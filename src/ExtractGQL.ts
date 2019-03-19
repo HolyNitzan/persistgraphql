@@ -47,6 +47,7 @@ export type ExtractGQLOptions = {
   queryTransformers?: QueryTransformer[],
   extension?: string,
   inJsCode?: boolean,
+  useOperationName?: boolean,
 };
 
 export class ExtractGQL {
@@ -65,6 +66,9 @@ export class ExtractGQL {
 
   // Whether to look for standalone .graphql files or template literals in JavaScript code
   public inJsCode: boolean = false;
+
+  // Whether to look for standalone .graphql files or template literals in JavaScript code
+  public useOperationName: boolean = false;
 
   // The template literal tag for GraphQL queries in JS code
   public literalTag: string = 'gql';
@@ -111,12 +115,14 @@ export class ExtractGQL {
     queryTransformers = [],
     extension = 'graphql',
     inJsCode = false,
+    useOperationName = true,
   }: ExtractGQLOptions) {
     this.inputFilePath = inputFilePath;
     this.outputFilePath = outputFilePath;
     this.queryTransformers = queryTransformers;
     this.extension = extension;
     this.inJsCode = inJsCode;
+    this.useOperationName = useOperationName;
   }
 
   // Add a query transformer to the end of the list of query transformers.
@@ -145,7 +151,7 @@ export class ExtractGQL {
 
   // Create an OutputMap from a GraphQL document that may contain
   // queries, mutations and fragments.
-  public createMapFromDocument(document: DocumentNode): OutputMap {
+  public createMapFromDocument(document: DocumentNode, operationName?: string): OutputMap {
     const transformedDocument = this.applyQueryTransformers(document);
     const queryDefinitions = getOperationDefinitions(transformedDocument);
     const result: OutputMap = {};
@@ -153,7 +159,11 @@ export class ExtractGQL {
       const transformedQueryWithFragments = this.getQueryFragments(transformedDocument, transformedDefinition);
       transformedQueryWithFragments.definitions.unshift(transformedDefinition);
       const docQueryKey = this.getQueryDocumentKey(transformedQueryWithFragments);
-      result[docQueryKey] = this.getQueryId();
+      if (operationName && this.useOperationName) {
+        result[operationName] = docQueryKey
+      } else {
+        result[docQueryKey] = this.getQueryId();
+      }
     });
     return result;
   }
@@ -179,7 +189,7 @@ export class ExtractGQL {
 
     const resultMaps = Object.keys(docMap).map((operationName) => {
       const document = docMap[operationName];
-      return this.createMapFromDocument(document);
+      return this.createMapFromDocument(document, operationName);
     });
 
     return (_.merge({} as OutputMap, ...resultMaps) as OutputMap);
@@ -308,6 +318,10 @@ export class ExtractGQL {
     });
   }
 
+  public runtimeExtraction(): Promise<OutputMap>{
+    return this.processInputPath(this.inputFilePath);
+  }
+
   // Extracts GraphQL queries from this.inputFilePath and produces
   // an output JSON file in this.outputFilePath.
   public extract() {
@@ -368,6 +382,10 @@ export const main = (argv: YArgsv) => {
 
   if (argv['extension']) {
     options.extension = argv['extension'];
+  }
+
+  if (argv['useOperationName']) {
+    options.useOperationName = true
   }
 
   new ExtractGQL(options).extract();

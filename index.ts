@@ -4,6 +4,8 @@ import {
   addPersistedQueries,
 } from './src/network_interface/ApolloNetworkInterface';
 
+import { ExtractGQL, ExtractGQLOptions } from './src/ExtractGQL';
+
 import {
   OutputMap,
   getQueryDocumentKey,
@@ -14,4 +16,6 @@ export {
   addPersistedQueries,
   getQueryDocumentKey,
   OutputMap,
+  ExtractGQL,
+  ExtractGQLOptions,
 };
