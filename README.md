@@ -109,3 +109,30 @@ server.ext('onPreHandler', (req: Request, reply) => {
   return reply.continue();
 });
 ```
+
+# Server in runtime execution
+```ts
+import { ExtractGQL, ExtractGQLOptions } from 'persistgraphql';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
+import { ApolloError, formatApolloErrors } from 'apollo-server-core';
+
+async function (req: Request, res: Response, next: NextFunction) {
+  const pql = new ExtractGQL({
+    useOperationName: true,
+    inputFilePath: path
+  });
+  const queryMap = await pql.runtimeExtraction()
+  const { operationName } = req.body;
+
+  if (!operationName) {
+    return sendInvalidOperationNameError(res);
+  }
+  const query = queryMap[operationName];
+  if (!query) {
+    return sendBadOperationNameError(operationName, res);
+  }
+
+  req.body.query = query;
+  return next();
+};
+```
