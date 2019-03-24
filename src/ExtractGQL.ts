@@ -238,7 +238,6 @@ export class ExtractGQL {
     return new Promise<string>((resolve, reject) => {
       ExtractGQL.isDirectory(inputPath).then((isDirectory) => {
         if (isDirectory) {
-          console.log(`Crawling ${inputPath}...`);
           // Recurse over the files within this directory.
           fs.readdir(inputPath, (err, items) => {
             if (err) {
