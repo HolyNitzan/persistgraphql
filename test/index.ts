@@ -490,6 +490,27 @@ describe('ExtractGQL', () => {
     });
   });
 
+  describe('useOperationName', () => {
+    it('should use useOperationName and generate map', (done) => {
+      const pgql = new ExtractGQL({
+        inputFilePath: 'not-real',
+        useOperationName: true,
+      });
+      pgql.processInputPath('./test/fixtures/single_query2/books_queries.graphql').then((result: OutputMap) => {
+        assert.equal(Object.keys(result).length, 2);
+        assert.include(
+          Object.keys(result),
+          'getBooks'
+        );
+        assert.include(
+          Object.keys(result),
+          'getBook'
+        );
+        done();
+      });
+    });
+  });
+
   describe('getQueryKey', () => {
     it('should apply query transformers before returning the query key', () => {
       const query = gql`

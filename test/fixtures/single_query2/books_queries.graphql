@@ -1,0 +1,11 @@
+query getBook($id: Int) {
+	book(id:$id) {
+      title
+  }  
+}
+
+query getBooks {
+	books {
+      title
+  }  
+}
