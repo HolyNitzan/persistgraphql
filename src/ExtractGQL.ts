@@ -115,7 +115,7 @@ export class ExtractGQL {
     queryTransformers = [],
     extension = 'graphql',
     inJsCode = false,
-    useOperationName = true,
+    useOperationName = false,
   }: ExtractGQLOptions) {
     this.inputFilePath = inputFilePath;
     this.outputFilePath = outputFilePath;
@@ -160,7 +160,7 @@ export class ExtractGQL {
       transformedQueryWithFragments.definitions.unshift(transformedDefinition);
       const docQueryKey = this.getQueryDocumentKey(transformedQueryWithFragments);
       if (operationName && this.useOperationName) {
-        result[operationName] = docQueryKey
+        result[operationName] = docQueryKey;
       } else {
         result[docQueryKey] = this.getQueryId();
       }
@@ -384,7 +384,7 @@ export const main = (argv: YArgsv) => {
   }
 
   if (argv['useOperationName']) {
-    options.useOperationName = true
+    options.useOperationName = true;
   }
 
   new ExtractGQL(options).extract();
